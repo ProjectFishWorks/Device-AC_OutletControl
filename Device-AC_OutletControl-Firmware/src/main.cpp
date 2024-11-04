@@ -17,8 +17,8 @@
 #define CURRENT_MESSAGE_ID 0x0A02          // 2562
 #define RELAY_1_ALERT_NODE_MESSAGE_ID 2563 // 2563
 #define RELAY_2_ALERT_NODE_MESSAGE_ID 2564 // 2564
-
-#define mesageDelay 1000
+#define RELAY_1_IN_ALERT_MESSAGE_ID 2565   // 2565
+#define RELAY_2_IN_ALERT_MESSAGE_ID 2566   // 2566
 
 bool is_Relay_1_in_Alert = false;
 bool is_Relay_2_in_Alert = false;
@@ -90,8 +90,9 @@ void setup()
 
   // Create a task to get the current
   xTaskCreate(getcurrent, "getcurrent", 4096, NULL, 1, NULL);
+  core.sendMessage(RELAY_1_IN_ALERT_MESSAGE_ID, (uint64_t)0);
+  core.sendMessage(RELAY_2_IN_ALERT_MESSAGE_ID, (uint64_t)0);
 }
-
 //-------------------------------------------------- loop() --------------------------------------------------
 
 void loop()
@@ -198,7 +199,7 @@ void receive_message(uint8_t nodeID, uint16_t messageID, uint64_t data)
           pixels.setPixelColor(1, pixels.Color(0, 255, 0));
           pixels.show();
           Serial.println("Relay 1 is ON");
-          delay(mesageDelay);
+          //delay(mesageDelay);
         }
       }
       else
@@ -210,7 +211,7 @@ void receive_message(uint8_t nodeID, uint16_t messageID, uint64_t data)
           pixels.setPixelColor(1, pixels.Color(255, 0, 0));
           pixels.show();
           Serial.println("Relay 1 is OFF");
-          delay(mesageDelay);
+         // delay(mesageDelay);
         }
         break;
 
@@ -225,7 +226,7 @@ void receive_message(uint8_t nodeID, uint16_t messageID, uint64_t data)
             pixels.show();
             Serial.println("Relay 2 is ON");
           }
-          delay(mesageDelay);
+          //delay(mesageDelay);
         }
         else
         {
@@ -236,7 +237,7 @@ void receive_message(uint8_t nodeID, uint16_t messageID, uint64_t data)
             pixels.setPixelColor(3, pixels.Color(255, 0, 0));
             pixels.show();
             Serial.println("Relay 2 is OFF");
-            delay(mesageDelay);
+           // delay(mesageDelay);
           }
         }
         break;
@@ -263,6 +264,7 @@ void receive_message(uint8_t nodeID, uint16_t messageID, uint64_t data)
       if (data == 1)
       {
         is_Relay_1_in_Alert = true;
+        core.sendMessage(RELAY_1_IN_ALERT_MESSAGE_ID, (uint64_t)1);
         digitalWrite(RELAY_1_NC_PIN, LOW);
         pixels.setPixelColor(0, pixels.Color(255, 0, 0));
         pixels.setPixelColor(1, pixels.Color(255, 0, 0));
@@ -272,6 +274,7 @@ void receive_message(uint8_t nodeID, uint16_t messageID, uint64_t data)
       else
       {
         is_Relay_1_in_Alert = false;
+        core.sendMessage(RELAY_1_IN_ALERT_MESSAGE_ID, (uint64_t)0);
         digitalWrite(RELAY_1_NC_PIN, HIGH);
         pixels.setPixelColor(0, pixels.Color(0, 255, 0));
         pixels.setPixelColor(1, pixels.Color(0, 255, 0));
@@ -287,6 +290,7 @@ void receive_message(uint8_t nodeID, uint16_t messageID, uint64_t data)
       if (data == 1)
       {
         is_Relay_2_in_Alert = true;
+        core.sendMessage(RELAY_2_IN_ALERT_MESSAGE_ID, (uint64_t)1);
         digitalWrite(RELAY_2_NO_PIN, LOW);
         pixels.setPixelColor(2, pixels.Color(255, 0, 0));
         pixels.setPixelColor(3, pixels.Color(255, 0, 0));
@@ -296,6 +300,7 @@ void receive_message(uint8_t nodeID, uint16_t messageID, uint64_t data)
       else
       {
         is_Relay_2_in_Alert = false;
+        core.sendMessage(RELAY_2_IN_ALERT_MESSAGE_ID, (uint64_t)0);
         digitalWrite(RELAY_2_NO_PIN, HIGH);
         pixels.setPixelColor(2, pixels.Color(0, 255, 0));
         pixels.setPixelColor(3, pixels.Color(0, 255, 0));
