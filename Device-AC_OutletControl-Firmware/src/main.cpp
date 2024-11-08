@@ -6,7 +6,7 @@
 #include <NodeControllerCore.h>
 
 #define NEOPIXEL_PIN 10
-#define NUMPIXELS 4 // Update to 4 NeoPixels
+#define NUMPIXELS 6 // Update to 6 NeoPixels
 
 #define RELAY_1_NC_PIN 0
 #define RELAY_2_NO_PIN 1
@@ -74,18 +74,24 @@ void setup()
   pinMode(1, OUTPUT);
 
   // Initialize I2C and ADS1115
-  Wire.begin(I2C_SDA, I2C_SCL);
+  Wire.begin(I2C_SDA, I2C_SCL); // 
   ads.setGain(GAIN_FOUR); // +/- 1.024V 1bit = 0.5mV
+  ads.setDataRate(RATE_ADS1115_128SPS); // 250 samples per second
   ads.begin();
+  Serial.println("Getting data rate");
+  Serial.println(ads.getDataRate());
+
 
   // Initialize NeoPixel
   pixels.begin();
   pixels.setBrightness(3); // Set brightness to 1% (90% less than current setting) // Set brightness to 10%
   pixels.clear();
-  pixels.setPixelColor(0, pixels.Color(0, 255, 0)); // Set first NeoPixel to green (relay 0 active)
-  pixels.setPixelColor(1, pixels.Color(0, 255, 0)); // Set second NeoPixel to green (relay 0 active)
-  pixels.setPixelColor(2, pixels.Color(0, 255, 0)); // Set third NeoPixel to green (relay 1 active)
-  pixels.setPixelColor(3, pixels.Color(0, 255, 0)); // Set fourth NeoPixel to green (relay 1 active)
+  pixels.setPixelColor(0, pixels.Color(0, 255, 0)); // Set first NeoPixel to green (always on)
+  pixels.setPixelColor(5, pixels.Color(0, 255, 0)); // Set sixth NeoPixel to green (always on)
+  pixels.setPixelColor(1, pixels.Color(0, 255, 0)); // Set second NeoPixel to green (relay 1 active)
+  pixels.setPixelColor(4, pixels.Color(0, 255, 0)); // Set fifth NeoPixel to green (relay 1 active)
+  pixels.setPixelColor(2, pixels.Color(0, 255, 0)); // Set third NeoPixel to green (relay 2 active)
+  pixels.setPixelColor(3, pixels.Color(0, 255, 0)); // Set fourth NeoPixel to green (relay 2 active)
   pixels.show();
 
   // Create a task to get the current
@@ -109,13 +115,13 @@ void loop()
       digitalWrite(0, relay0State ? HIGH : LOW);
       if (relay0State)
       {
-        pixels.setPixelColor(0, pixels.Color(0, 255, 0)); // Set first NeoPixel to green (relay 0 active)
-        pixels.setPixelColor(1, pixels.Color(0, 255, 0)); // Set second NeoPixel to green (relay 0 active)
+        pixels.setPixelColor(1, pixels.Color(0, 255, 0)); // Set first NeoPixel to green (relay 0 active)
+        pixels.setPixelColor(4, pixels.Color(0, 255, 0)); // Set second NeoPixel to green (relay 0 active)
       }
       else
       {
-        pixels.setPixelColor(0, pixels.Color(255, 0, 0)); // Set first NeoPixel to red (relay 0 inactive)
-        pixels.setPixelColor(1, pixels.Color(255, 0, 0)); // Set second NeoPixel to red (relay 0 inactive)
+        pixels.setPixelColor(1, pixels.Color(255, 0, 0)); // Set first NeoPixel to red (relay 0 inactive)
+        pixels.setPixelColor(4, pixels.Color(255, 0, 0)); // Set second NeoPixel to red (relay 0 inactive)
       }
       pixels.show();
     }
@@ -159,6 +165,7 @@ void getcurrent(void *parameters)
 
       sum += sq(current);
       counter = counter + 1;
+      delay(7);
     }
 
     total_current = sqrt(sum / counter);
