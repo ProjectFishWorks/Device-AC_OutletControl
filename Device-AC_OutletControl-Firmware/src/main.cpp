@@ -25,7 +25,8 @@ bool is_Relay_2_in_Alert = false;
 
 int relay_1_alert_node = -1;
 int relay_2_alert_node = -1;
-
+bool relay1PreviousState = true;
+bool relay2PreviousState = true;
 float total_current = 0;
 
 Adafruit_ADS1115 ads;
@@ -67,7 +68,7 @@ void setup()
   }
 
   digitalWrite(0, HIGH);
-  digitalWrite(1, HIGH);
+  digitalWrite(1, LOW);
 
   // initialize digital pins 0 and 1 as outputs
   pinMode(0, OUTPUT);
@@ -90,8 +91,8 @@ void setup()
   pixels.setPixelColor(5, pixels.Color(0, 255, 0)); // Set sixth NeoPixel to green (always on)
   pixels.setPixelColor(1, pixels.Color(0, 255, 0)); // Set second NeoPixel to green (relay 1 active)
   pixels.setPixelColor(4, pixels.Color(0, 255, 0)); // Set fifth NeoPixel to green (relay 1 active)
-  pixels.setPixelColor(2, pixels.Color(0, 255, 0)); // Set third NeoPixel to green (relay 2 active)
-  pixels.setPixelColor(3, pixels.Color(0, 255, 0)); // Set fourth NeoPixel to green (relay 2 active)
+  pixels.setPixelColor(2, pixels.Color(255, 0, 0)); // Set third NeoPixel to green (relay 2 active)
+  pixels.setPixelColor(3, pixels.Color(255, 0, 0)); // Set fourth NeoPixel to green (relay 2 active)
   pixels.show();
 
   // Create a task to get the current
@@ -201,9 +202,10 @@ void receive_message(uint8_t nodeID, uint16_t messageID, uint64_t data)
       {
         if (!is_Relay_1_in_Alert)
         {
+          relay1PreviousState = true;
           digitalWrite(RELAY_1_NC_PIN, LOW);
-          pixels.setPixelColor(0, pixels.Color(0, 255, 0));
           pixels.setPixelColor(1, pixels.Color(0, 255, 0));
+          pixels.setPixelColor(4, pixels.Color(0, 255, 0));
           pixels.show();
           Serial.println("Relay 1 is ON");
           //delay(mesageDelay);
@@ -213,9 +215,10 @@ void receive_message(uint8_t nodeID, uint16_t messageID, uint64_t data)
       {
         if (!is_Relay_1_in_Alert)
         {
+          relay1PreviousState = false;
           digitalWrite(RELAY_1_NC_PIN, HIGH);
-          pixels.setPixelColor(0, pixels.Color(255, 0, 0));
           pixels.setPixelColor(1, pixels.Color(255, 0, 0));
+          pixels.setPixelColor(4, pixels.Color(255, 0, 0));
           pixels.show();
           Serial.println("Relay 1 is OFF");
          // delay(mesageDelay);
@@ -227,6 +230,7 @@ void receive_message(uint8_t nodeID, uint16_t messageID, uint64_t data)
         {
           if (!is_Relay_2_in_Alert)
           {
+            relay2PreviousState = true;
             digitalWrite(RELAY_2_NO_PIN, HIGH);
             pixels.setPixelColor(2, pixels.Color(0, 255, 0));
             pixels.setPixelColor(3, pixels.Color(0, 255, 0));
@@ -239,6 +243,7 @@ void receive_message(uint8_t nodeID, uint16_t messageID, uint64_t data)
         {
           if (!is_Relay_2_in_Alert)
           {
+            relay2PreviousState = false;
             digitalWrite(RELAY_2_NO_PIN, LOW);
             pixels.setPixelColor(2, pixels.Color(255, 0, 0));
             pixels.setPixelColor(3, pixels.Color(255, 0, 0));
@@ -272,9 +277,9 @@ void receive_message(uint8_t nodeID, uint16_t messageID, uint64_t data)
       {
         is_Relay_1_in_Alert = true;
         core.sendMessage(RELAY_1_IN_ALERT_MESSAGE_ID, (uint64_t)1);
-        digitalWrite(RELAY_1_NC_PIN, LOW);
-        pixels.setPixelColor(0, pixels.Color(255, 0, 0));
+        digitalWrite(RELAY_1_NC_PIN, HIGH);
         pixels.setPixelColor(1, pixels.Color(255, 0, 0));
+        pixels.setPixelColor(4, pixels.Color(255, 0, 0));
         pixels.show();
         Serial.println("Relay 1 is in alert");
       }
@@ -282,9 +287,9 @@ void receive_message(uint8_t nodeID, uint16_t messageID, uint64_t data)
       {
         is_Relay_1_in_Alert = false;
         core.sendMessage(RELAY_1_IN_ALERT_MESSAGE_ID, (uint64_t)0);
-        digitalWrite(RELAY_1_NC_PIN, HIGH);
-        pixels.setPixelColor(0, pixels.Color(0, 255, 0));
-        pixels.setPixelColor(1, pixels.Color(0, 255, 0));
+        digitalWrite(RELAY_1_NC_PIN, !relay1PreviousState);
+        pixels.setPixelColor(1, pixels.Color(relay1PreviousState ? 0 : 255, relay1PreviousState ? 255 : 0, 0));
+        pixels.setPixelColor(4, pixels.Color(relay1PreviousState ? 0 : 255, relay1PreviousState ? 255 : 0, 0));
         pixels.show();
         Serial.println("Relay 1 is out of alert");
       }
@@ -292,7 +297,7 @@ void receive_message(uint8_t nodeID, uint16_t messageID, uint64_t data)
   }
   if (nodeID == relay_2_alert_node)
   {
-    if (messageID == 901 || messageID == 900)
+    if (messageID == 901)
     {
       if (data == 1)
       {
@@ -308,9 +313,9 @@ void receive_message(uint8_t nodeID, uint16_t messageID, uint64_t data)
       {
         is_Relay_2_in_Alert = false;
         core.sendMessage(RELAY_2_IN_ALERT_MESSAGE_ID, (uint64_t)0);
-        digitalWrite(RELAY_2_NO_PIN, HIGH);
-        pixels.setPixelColor(2, pixels.Color(0, 255, 0));
-        pixels.setPixelColor(3, pixels.Color(0, 255, 0));
+        digitalWrite(RELAY_2_NO_PIN, relay2PreviousState);
+        pixels.setPixelColor(2, pixels.Color(relay2PreviousState ? 0 : 255, relay2PreviousState ? 255 : 0, 0));
+        pixels.setPixelColor(3, pixels.Color(relay2PreviousState ? 0 : 255, relay2PreviousState ? 255 : 0, 0));
         pixels.show();
         Serial.println("Relay 2 is out of alert");
       }
