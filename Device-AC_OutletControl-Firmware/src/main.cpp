@@ -19,7 +19,11 @@
 #define RELAY_2_ALERT_NODE_MESSAGE_ID 2564 // 2564
 #define RELAY_1_IN_ALERT_MESSAGE_ID 2565   // 2565
 #define RELAY_2_IN_ALERT_MESSAGE_ID 2566   // 2566
+#define RELAY_1_ALERT_INVERTED_MESSAGE_ID 2567 // 2567
+#define RELAY_2_ALERT_INVERTED_MESSAGE_ID 2568 // 2568
 
+bool Relay_1_Alert_Inverted = false;
+bool Relay_2_Alert_Inverted = false;
 bool is_Relay_1_in_Alert = false;
 bool is_Relay_2_in_Alert = false;
 
@@ -263,6 +267,16 @@ void receive_message(uint8_t nodeID, uint16_t messageID, uint64_t data)
         Serial.print("Relay 2 alert node: ");
         Serial.println(relay_2_alert_node);
         break;
+      case RELAY_1_ALERT_INVERTED_MESSAGE_ID:
+        Relay_1_Alert_Inverted = data;
+        Serial.print("Relay 1 alert inverted: ");
+        Serial.println(Relay_1_Alert_Inverted);
+        break;
+      case RELAY_2_ALERT_INVERTED_MESSAGE_ID:
+        Relay_2_Alert_Inverted = data;
+        Serial.print("Relay 2 alert inverted: ");
+        Serial.println(Relay_2_Alert_Inverted);
+        break;
 
       default:
         break;
@@ -277,9 +291,10 @@ void receive_message(uint8_t nodeID, uint16_t messageID, uint64_t data)
       {
         is_Relay_1_in_Alert = true;
         core.sendMessage(RELAY_1_IN_ALERT_MESSAGE_ID, (uint64_t)1);
-        digitalWrite(RELAY_1_NC_PIN, HIGH);
-        pixels.setPixelColor(1, pixels.Color(255, 0, 0));
-        pixels.setPixelColor(4, pixels.Color(255, 0, 0));
+
+        digitalWrite(RELAY_1_NC_PIN, !Relay_1_Alert_Inverted);
+        pixels.setPixelColor(1, pixels.Color(Relay_1_Alert_Inverted ? 0 : 255, Relay_1_Alert_Inverted ? 255 : 0, 0));
+        pixels.setPixelColor(4, pixels.Color(Relay_1_Alert_Inverted ? 0 : 255, Relay_1_Alert_Inverted ? 255 : 0, 0));
         pixels.show();
         Serial.println("Relay 1 is in alert");
       }
@@ -303,9 +318,9 @@ void receive_message(uint8_t nodeID, uint16_t messageID, uint64_t data)
       {
         is_Relay_2_in_Alert = true;
         core.sendMessage(RELAY_2_IN_ALERT_MESSAGE_ID, (uint64_t)1);
-        digitalWrite(RELAY_2_NO_PIN, LOW);
-        pixels.setPixelColor(2, pixels.Color(255, 0, 0));
-        pixels.setPixelColor(3, pixels.Color(255, 0, 0));
+        digitalWrite(RELAY_2_NO_PIN, Relay_2_Alert_Inverted);
+        pixels.setPixelColor(2, pixels.Color(Relay_2_Alert_Inverted ? 0 : 255, Relay_2_Alert_Inverted ? 255 : 0, 0));
+        pixels.setPixelColor(3, pixels.Color(Relay_2_Alert_Inverted ? 0 : 255, Relay_2_Alert_Inverted ? 255 : 0, 0));
         pixels.show();
         Serial.println("Relay 2 is in alert");
       }
