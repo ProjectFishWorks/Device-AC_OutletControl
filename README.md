@@ -1,4 +1,4 @@
-# Device-AC_OutletControl
+# Device AC Outlet Control
 
 The AC outlet control device allows for the control standard household AC outlets. The deivce provides two channels of switchabled outlets that can be toggled mannually or automatically in response to alerts fromo other devices.
 
