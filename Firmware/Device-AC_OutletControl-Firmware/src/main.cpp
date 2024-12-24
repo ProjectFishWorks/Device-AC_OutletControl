@@ -27,8 +27,8 @@ bool Relay_2_Alert_Inverted = false;
 bool is_Relay_1_in_Alert = false;
 bool is_Relay_2_in_Alert = false;
 
-int relay_1_alert_node = -1;
-int relay_2_alert_node = -1;
+int relay_1_alert_node = 163;
+int relay_2_alert_node = 163;
 bool relay1PreviousState = true;
 bool relay2PreviousState = true;
 float total_current = 0;
